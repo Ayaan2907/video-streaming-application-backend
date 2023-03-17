@@ -10,13 +10,11 @@ import decodeAuthToken from "../middleware/decodeAuthToken.js";
 
 const commentRoutes = express.Router();
 
-// Public routes
-// none
-
 // Private routes
-commentRoutes.get("/all-videos", decodeAuthToken, getAllComments);
-commentRoutes.get("/video/:id", decodeAuthToken, getComment);
-commentRoutes.post("/upload-video", decodeAuthToken, createComment);
-commentRoutes.delete("/video/:id", decodeAuthToken, deleteComment);
+// FIXME: refactoring for comment routes needed 
+commentRoutes.get("/all-comments/:videoId", decodeAuthToken, getAllComments);
+// commentRoutes.get("/comment/:id", decodeAuthToken, getComment);
+commentRoutes.post("/create-comment", decodeAuthToken, createComment);
+commentRoutes.delete("/delete-comment/:id", decodeAuthToken, deleteComment);
 
 export default commentRoutes;
