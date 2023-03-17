@@ -4,6 +4,8 @@ import http from "http";
 import config from "./config/config.js";
 import Logging from "./library/logging.js";
 import authRouter from "./routes/auther.routes.js";
+import videoRouter from "./routes/video.routes.js";
+import commentRouter from "./routes/comment.routes.js";
 import decodeAuthToken from "./middleware/decodeAuthToken.js";
 import { IUser } from "./types/user.type.js";
 
@@ -53,16 +55,22 @@ const initServer = (router: Express) => {
 
     // auth routes : create, login, update, delete user, getOne, getAll
     router.use("/auth", authRouter);
+    router.use("/video", videoRouter);
+    router.use("/comment", commentRouter); //FIXME: check to use comment here of inside video middleware.
 
     // example route to check token based access
-    router.get("/video", decodeAuthToken, (req: Request, res: Response) => {
-        const user = req.body.user as IUser;
-        if (user.role !== "student") res.status(401).send("Unauthorized");
-        else {
-            Logging.event(`User ${user.name} is watching video`);
-            res.send("Hello World video");
+    router.get(
+        "/sample-protected",
+        decodeAuthToken,
+        (req: Request, res: Response) => {
+            const user = req.body.user as IUser;
+            if (user.role !== "student") res.status(401).send("Unauthorized");
+            else {
+                Logging.event(`User ${user.name} is watching video`);
+                res.send("Hello World video");
+            }
         }
-    });
+    );
 
     // TODO: a way to handle unavailable routes
 
