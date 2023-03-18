@@ -23,7 +23,7 @@ const validateAuthToken = (req: Request, res: Response, next: NextFunction) => {
             //     user: decodedUser as IUser,
             // });
 
-            req.body.user = decodedUser as IUser;
+            req.user = decodedUser as IUser;
             next();
         });
     } catch (error) {
