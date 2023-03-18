@@ -63,7 +63,7 @@ const initServer = (router: Express) => {
         "/sample-protected",
         decodeAuthToken,
         (req: Request, res: Response) => {
-            const user = req.body.user as IUser;
+            const user = req.user ;
             if (user.role !== "student") res.status(401).send("Unauthorized");
             else {
                 Logging.event(`User ${user.name} is watching video`);
