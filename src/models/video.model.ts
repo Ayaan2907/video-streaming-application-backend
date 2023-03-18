@@ -1,6 +1,5 @@
-import { Document, Schema, model, Types } from "mongoose";
+import { Document, Schema, model } from "mongoose";
 import { IVideo } from "../types/video.type.js";
-import CommentSchema from "./comment.model.js";
 
 const VideoSchema: Schema = new Schema<IVideo>(
     {
@@ -10,7 +9,7 @@ const VideoSchema: Schema = new Schema<IVideo>(
         video: { data: Buffer, contentType: String },
         // thumbnail: { data: Buffer, contentType: String },
         // TODO: jugad to store it in chunks
-        comments: { type: [CommentSchema], default: [] },
+        comments: { type: [String], default: [] },
         likes: { type: Number, default: 0 },
         dislikes: { type: Number, default: 0 },
     },
@@ -22,9 +21,8 @@ const VideoSchema: Schema = new Schema<IVideo>(
     }
 );
 
-const Video = model<IVideo & Document>("Videos", VideoSchema);
+// const bucket = new mongo.GridFSBucket(connection.db, {
+//     bucketName: "uploads",
+// });
 
-export default {
-    Video,
-    VideoSchema,
-};
+export default model<IVideo & Document>("Videos", VideoSchema);;
