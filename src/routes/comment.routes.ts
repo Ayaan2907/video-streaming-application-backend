@@ -12,9 +12,9 @@ const commentRoutes = express.Router();
 
 // Private routes
 // FIXME: refactoring for comment routes needed 
-commentRoutes.get("/all-comments/:videoId", decodeAuthToken, getAllComments);
-// commentRoutes.get("/comment/:id", decodeAuthToken, getComment);
-commentRoutes.post("/create-comment", decodeAuthToken, createComment);
+commentRoutes.get("/all-comments/:id", decodeAuthToken, getAllComments);
+commentRoutes.get("/comment/:id", decodeAuthToken, getComment);
+commentRoutes.post("/create-comment/:id", decodeAuthToken, createComment);
 commentRoutes.delete("/delete-comment/:id", decodeAuthToken, deleteComment);
 
 export default commentRoutes;

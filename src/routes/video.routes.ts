@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
-
+import {getComment, getAllComments, createComment, deleteComment } from "../controller/comment.controller.js";
 import {
     getVideo,
     getAllVideos,
@@ -15,7 +15,7 @@ const videoRoutes = express.Router();
 
 // Private routes
 videoRoutes.get("/all-videos", decodeAuthToken, getAllVideos);
-videoRoutes.get("/video/:id", decodeAuthToken, getVideo);
+videoRoutes.get("/video/:id", decodeAuthToken, getVideo, getAllComments);
 videoRoutes.post("/upload-video", decodeAuthToken, uploadVideo);
 videoRoutes.delete("/video/:id", decodeAuthToken, deleteVideo);
 
