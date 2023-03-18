@@ -1,9 +1,15 @@
+export enum Role {
+    ADMIN = "admin",
+    STUDENT = "student",
+    TEACHER = "teacher",
+}
+
 
 export interface IUser {
-    id: number;
+    _id: string;
     name: string;
     email: string;
     password: string;
-    role: "admin" | "student" | "teacher";
+    role: Role;
     other?: any;
 }

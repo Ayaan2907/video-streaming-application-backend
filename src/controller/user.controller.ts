@@ -50,7 +50,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
 
 const getUser = async (req: Request, res: Response, next: NextFunction) => {
     const { id, email } = req.params;
-    const decodedUser = await req.body.user;
+    const decodedUser = req.user;
 
     // FIXME: unable to find using mail : unable to cast to objectId
 
@@ -96,7 +96,7 @@ const getUser = async (req: Request, res: Response, next: NextFunction) => {
 const getAllUsers = async (req: Request, res: Response) => {
     try {
         const users = await userCollection.find();
-        Logging.info(users);
+        // Logging.info(users);
         res.status(200).send({
             message: "Displaying all users",
             data: users,
@@ -139,7 +139,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
             if (result) {
                 const token = jwt.sign(
                     {
-                        _id: user.id,
+                        _id: user._id,
                         name: user.name,
                         email: user.email,
                         role: user.role,
@@ -172,7 +172,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     // following 2 lines might be unreliable, but I am doint it in this way for now
     const { id } = req.params;
-    const decodedUser = await req.body.user;
+    const decodedUser = req.user;
     const { modifiedData } = await req.body;
 
     if (!id) {
@@ -216,7 +216,7 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
 };
 const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-    const decodedUser = await req.body.user;
+    const decodedUser = req.user;
 
     if (!id) {
         return commonErrorActions.missingFields(res, "Pass user id to delete");
