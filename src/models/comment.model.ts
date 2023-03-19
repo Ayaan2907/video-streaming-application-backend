@@ -1,4 +1,4 @@
-import { Document, Schema, model } from "mongoose";
+import { Document, Schema, Types, model } from "mongoose";
 import { IComment, IReply } from "../types/comment.type.js";
 
 // const ReplySchema: Schema = new Schema<IReply>(
@@ -19,8 +19,8 @@ import { IComment, IReply } from "../types/comment.type.js";
 
 const CommentSchema: Schema = new Schema<IComment>(
     {
-        videoId: { type: String, required: true },
-        authorId: { type: String, required: true },
+        video: { type: Types.ObjectId, ref: "Videos", required: true },
+        author: { type: String, required: true },
         comment: { type: String, required: true },
         // replies: { type: [String], default: [] },
         likes: { type: Number, default: 0 },

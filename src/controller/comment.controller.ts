@@ -12,28 +12,24 @@ const createComment = async (
     res: Response,
     next: NextFunction
 ) => {
-    const videoId = req.params.id;
+    const videoID = req.params.id;
     const { comment } = req.body;
     const { _id, role } = req.user;
 
-    if (!videoId && !mongoose.Types.ObjectId.isValid(videoId)) {
-        // this can be further fixed to check if the video exist in the database or not
-        return commonErrorActions.missingFields(
-            res,
-            "Video Id or comment is missing"
-        );
-    }
+    !videoID &&
+        !mongoose.Types.ObjectId.isValid(videoID) &&
+        commonErrorActions.missingFields(res, "Video Id or comment is missing");
+    // this can be further fixed to check if the video exist in the database or not
 
     try {
         const newComment = new commentCollecion.Comment({
-            videoId,
+            video: videoID,
             comment,
-            authorId: _id,
+            author: _id,
         });
         await newComment.save();
         try {
-            // FIXME: try to find better way for repeated code
-            await videoCollection.findByIdAndUpdate(videoId, {
+            await videoCollection.findByIdAndUpdate(videoID, {
                 $push: { comments: newComment._id },
             });
         } catch (error) {
@@ -43,7 +39,7 @@ const createComment = async (
                 "Error while updating video with comment"
             );
         }
-        Logging.info(`Comment created in video with id: ${videoId}`);
+        Logging.info(`Comment created in video with id: ${videoID}`);
         res.status(201).json({
             message: "Comment created",
             data: newComment,
@@ -56,13 +52,15 @@ const createComment = async (
 const getComment = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
-    if (!id) {
+    if (!id)
         return commonErrorActions.missingFields(res, "Comment Id is missing");
-    }
 
     try {
         const comment: IComment | null =
             await commentCollecion.Comment.findById(id);
+        if (!comment)
+            return commonErrorActions.emptyResponse(res, "Comment not found");
+
         Logging.info(`Comment fetched with id: ${id}`);
         res.status(200).json({
             message: "Comment fetched",
@@ -81,17 +79,16 @@ const getAllComments = async (
     res: Response,
     next: NextFunction
 ) => {
-    const videoId = req.params.id;
+    const videoID = req.params.id;
 
-    if (!videoId) {
+    if (!videoID)
         return commonErrorActions.missingFields(
             res,
             "Video Id is required to fetch comments"
         );
-    }
 
     try {
-        const comments = await commentCollecion.Comment.find({ videoId });
+        const comments = await commentCollecion.Comment.find({ videoID });
         Logging.info("Comments fetched");
         res.status(200).json({
             message: "Comments fetched",
@@ -107,40 +104,34 @@ const deleteComment = async (
     res: Response,
     next: NextFunction
 ) => {
-    const commentID  = req.params.id;
+    const commentID = req.params.id;
     const { _id, role } = req.user;
 
-    if (!commentID) {
+    if (!commentID)
         return commonErrorActions.missingFields(res, "Comment Id is missing");
-    }
 
     try {
         const comment: IComment | null =
             await commentCollecion.Comment.findById(commentID);
-        if (!comment) {
-            return commonErrorActions.emptyResponse(res, "Comment not found");
-        }
 
-        if (comment?.authorId !== _id || role !== Role.ADMIN) {
-            return commonErrorActions.unauthorized(
+        if (!comment)
+            return commonErrorActions.emptyResponse(res, "Comment not found");
+
+        (comment.author.toString() !== _id || role !== Role.ADMIN) &&
+            commonErrorActions.unauthorized(
                 res,
                 "You are not authorized to delete this comment"
             );
-        }
 
-        commentCollecion.Comment.deleteOne({ _id: commentID }, (err) => {
-            if (err) {
-                return commonErrorActions.other(
-                    res,
-                    err,
-                    "Error in deleting comment"
-                );
-            }
+        commentCollecion.Comment.deleteOne({ _id: commentID }, async (err) => {
+            err ??
+                commonErrorActions.other(res, err, "Error in deleting comment");
+
             try {
-            // FIXME: try to find better way for repeated code
-                videoCollection.findByIdAndUpdate(comment.videoId, {
+                await videoCollection.findByIdAndUpdate(comment.video._id, {
                     $pull: { comments: commentID },
                 });
+                Logging.info(`comment ${commentID} deleted from video`);
             } catch (error) {
                 commonErrorActions.other(
                     res,

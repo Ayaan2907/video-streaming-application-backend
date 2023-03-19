@@ -1,7 +1,8 @@
+import { Document } from 'mongoose';
 export interface IReply {
     _id: string;
-    commentId: string;
-    authorId: string;
+    comment: Document;
+    author: Document;
     reply: string;
     likes: number;
     dislikes: number;
@@ -9,8 +10,8 @@ export interface IReply {
 
 export interface IComment {
     _id: string;
-    videoId: string;
-    authorId: string;
+    video: Document;
+    author: Document;
     comment: string;
     // replies?: IReply[];
     likes: number;

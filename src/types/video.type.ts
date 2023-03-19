@@ -1,10 +1,11 @@
 import { IComment } from "./comment.type.js";
 // import { IUser } from "./user.type.js";
+import { Document } from "mongoose";
 export interface IVideo {
     _id: string;
     title: string;
     description: string;
-    authorId: string;
+    author: Document;
     video: {
         data: Buffer;
         contentType: string;
@@ -13,9 +14,8 @@ export interface IVideo {
 
     likes: number;
     dislikes: number;
-    comments: IComment[];
+    comments: IComment[] | Document[];
 
-    // author: IUser;
     // thumbnail: {
     //     data: Buffer;
     //     contentType: string;
