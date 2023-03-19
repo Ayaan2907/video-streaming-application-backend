@@ -11,12 +11,11 @@ import jwt from "jsonwebtoken";
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
     const { name, email, password, role } = req.body;
 
-    if (!name || !email || !password || !role) {
-        return commonErrorActions.missingFields(
+    (!name || !email || !password || !role) ??
+        commonErrorActions.missingFields(
             res,
             "Missing either name, email, role or password"
         );
-    }
 
     bcrypt.hash(password, 10, async (err, hash) => {
         if (err) {
@@ -34,7 +33,11 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
                 Logging.info(`User ${user.name} created`);
                 res.status(201).send({
                     message: "User created",
-                    data: user,
+                    data: {
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                    },
                 });
                 next();
             } catch (error) {
@@ -54,19 +57,12 @@ const getUser = async (req: Request, res: Response, next: NextFunction) => {
 
     // FIXME: unable to find using mail : unable to cast to objectId
 
-    if (!decodedUser || decodedUser._id !== id) {
-        return commonErrorActions.unauthorized(
-            res,
-            "Cannot access other user's data"
-        );
-    }
+    (!decodedUser || decodedUser._id !== id) ??
+        commonErrorActions.unauthorized(res, "Cannot access other user's data");
 
-    if (!id && !email) {
-        return commonErrorActions.missingFields(
-            res,
-            "Missing either id or email"
-        );
-    }
+    (!id && !email) ??
+        commonErrorActions.missingFields(res, "Missing either id or email");
+
     try {
         const user = await (!email
             ? userCollection.findById(id)
@@ -74,9 +70,8 @@ const getUser = async (req: Request, res: Response, next: NextFunction) => {
                   email: email,
               }));
 
-        if (!user) {
+        if (!user)
             return commonErrorActions.emptyResponse(res, "User not found");
-        }
 
         Logging.info(`User ${user.name} found`);
         res.status(200).send({
@@ -95,11 +90,19 @@ const getUser = async (req: Request, res: Response, next: NextFunction) => {
 
 const getAllUsers = async (req: Request, res: Response) => {
     try {
-        const users = await userCollection.find();
-        // Logging.info(users);
+        const users: any = await userCollection.find();
+
+        !users ?? commonErrorActions.emptyResponse(res, "No users found");
+        Logging.info(`Users found: ${users.length}`);
+
         res.status(200).send({
             message: "Displaying all users",
-            data: users,
+            data: users.map((user: any) => {
+                return {
+                    ...user._doc,
+                    password: "Very secure!",
+                };
+            }),
         });
     } catch (error) {
         commonErrorActions.other(
@@ -113,19 +116,17 @@ const getAllUsers = async (req: Request, res: Response) => {
 const loginUser = async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-        return commonErrorActions.missingFields(
+    (!email || !password) &&
+        commonErrorActions.missingFields(
             res,
             "Missing either email or password"
         );
-    }
 
     try {
         const user: IUser | null = await userCollection.findOne({ email });
 
-        if (!user) {
+        if (!user)
             return commonErrorActions.emptyResponse(res, "User not found");
-        }
 
         // comparing the passwords and generating token
         bcrypt.compare(password, user.password, (err, result) => {
@@ -136,6 +137,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
                     "Error in decrypting passwords"
                 );
             }
+            user.password = "Very secure!";
             if (result) {
                 const token = jwt.sign(
                     {
@@ -154,11 +156,18 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 
                 // setting the token in the header for next requests
                 Logging.event(`Token generated for user: ${user.name}`);
-                res.set("Authorization", `Bearer ${token}`).status(200).send({
-                    message: "User logged in",
-                    token: token,
-                    data: user,
-                });
+                res.set("Authorization", `Bearer ${token}`)
+                    .status(200)
+                    .send({
+                        message: "User logged in",
+                        // token: token,
+                        data: user,
+                    })
+                    .cookie("token", token, {
+                        httpOnly: true,
+                        secure: true,
+                    });
+
                 next();
             } else {
                 commonErrorActions.unauthorized(res, "Invalid password");
@@ -175,16 +184,10 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     const decodedUser = req.user;
     const { modifiedData } = await req.body;
 
-    if (!id) {
-        return commonErrorActions.missingFields(res, "Pass user id to update");
-    }
+    !id && commonErrorActions.missingFields(res, "Pass user id to update");
 
-    if (id !== decodedUser._id) {
-        return commonErrorActions.unauthorized(
-            res,
-            "You can only update yourself"
-        );
-    }
+    id !== decodedUser._id ??
+        commonErrorActions.unauthorized(res, "You can only update yourself");
 
     try {
         await userCollection
@@ -218,15 +221,10 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const decodedUser = req.user;
 
-    if (!id) {
-        return commonErrorActions.missingFields(res, "Pass user id to delete");
-    }
-    if (id !== decodedUser._id) {
-        return commonErrorActions.unauthorized(
-            res,
-            "You can only update yourself"
-        );
-    }
+    !id ?? commonErrorActions.missingFields(res, "Pass user id to delete");
+
+    id !== decodedUser._id ??
+        commonErrorActions.unauthorized(res, "You can only update yourself");
 
     try {
         await userCollection

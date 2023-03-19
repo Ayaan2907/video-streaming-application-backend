@@ -6,6 +6,19 @@ const userSchema: Schema = new Schema<IUser>(
         name: { type: String, required: true },
         email: { type: String, required: true, unique: true },
         password: { type: String, required: true },
+        // other: [
+        //     {
+        //         name: "uploadedVideos",
+        //         type: Schema.Types.ObjectId,
+        //         ref: "Videos",
+        //     },
+        //     {
+        //         name: "postedComments",
+        //         type: Schema.Types.ObjectId,
+        //         ref: "Comments",
+        //     }
+        // ], Later 
+
         role: {
             type: String,
             required: true,

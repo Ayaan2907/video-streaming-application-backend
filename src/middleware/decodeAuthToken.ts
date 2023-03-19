@@ -5,7 +5,7 @@ import Logging from "../library/logging.js";
 import commonErrorActions from "../types/error.type.js";
 import { IUser } from "../types/user.type.js";
 
-const validateAuthToken = (req: Request, res: Response, next: NextFunction) => {
+const decodeAuthToken = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
 
@@ -14,9 +14,7 @@ const validateAuthToken = (req: Request, res: Response, next: NextFunction) => {
     }
     try {
         jwt.verify(token, config.jwt.JWT_SECRET, (err, decodedUser) => {
-            if (err) {
-                return commonErrorActions.other(res, err);
-            }
+            err ?? commonErrorActions.other(res, err);
             Logging.event(`Token is valid for user: ${decodedUser as IUser}`);
             // res.status(200).send({
             //     message: "Token is valid",
@@ -31,4 +29,4 @@ const validateAuthToken = (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export default validateAuthToken;
+export default decodeAuthToken;

@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import http from "http";
 import config from "./config/config.js";
 import Logging from "./library/logging.js";
-import authRouter from "./routes/auther.routes.js";
+import authRouter from "./routes/user.routes.js";
 import videoRouter from "./routes/video.routes.js";
 import commentRouter from "./routes/comment.routes.js";
 import decodeAuthToken from "./middleware/decodeAuthToken.js";
