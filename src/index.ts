@@ -1,5 +1,5 @@
 import express, { Express, Request, Response, NextFunction } from "express";
-import mongoose from "mongoose";
+import mongoose, { Connection, mongo } from "mongoose";
 import http from "http";
 import config from "./config/config.js";
 import Logging from "./library/logging.js";
@@ -8,6 +8,11 @@ import videoRouter from "./routes/video.routes.js";
 import commentRouter from "./routes/comment.routes.js";
 import decodeAuthToken from "./middleware/decodeAuthToken.js";
 import { IUser } from "./types/user.type.js";
+import { CollectionNames } from "./types/collection.types.js"
+
+
+import multer from "multer";
+import Grid from 'gridfs-stream';
 
 const router: Express = express();
 const allowedOrigins = ["*"];
@@ -20,6 +25,10 @@ const connectDatabase = () => {
             w: "majority",
         })
         .then(() => {
+            // init gfs
+            mongoose.Connection.once("open", () => {
+                Grid(mongoose.connection.db, mongo).collection(CollectionNames.Video);
+            });
             Logging.info("Connected to MongoDB");
             initServer(router);
         })
@@ -63,7 +72,7 @@ const initServer = (router: Express) => {
         "/sample-protected",
         decodeAuthToken,
         (req: Request, res: Response) => {
-            const user = req.user ;
+            const user = req.user;
             if (user.role !== "student") res.status(401).send("Unauthorized");
             else {
                 Logging.event(`User ${user.name} is watching video`);

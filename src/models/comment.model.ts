@@ -1,5 +1,6 @@
 import { Document, Schema, Types, model } from "mongoose";
 import { IComment, IReply } from "../types/comment.type.js";
+import { CollectionNames } from "../types/collection.types.js"
 
 // const ReplySchema: Schema = new Schema<IReply>(
 //     {
@@ -34,7 +35,7 @@ const CommentSchema: Schema = new Schema<IComment>(
     }
 );
 
-const Comment = model<IComment & Document>("Comments", CommentSchema);
+const Comment = model<IComment & Document>(CollectionNames.Comment, CommentSchema);
 // const Reply = model<IReply & Document>("Replies", ReplySchema);
 
 export default {

@@ -1,5 +1,6 @@
 import { IUser, Role } from "../types/user.type.js";
 import { Document, Schema, model } from "mongoose";
+import { CollectionNames } from "../types/collection.types.js"
 
 const userSchema: Schema = new Schema<IUser>(
     {
@@ -34,4 +35,4 @@ const userSchema: Schema = new Schema<IUser>(
     }
 );
 
-export default model<IUser & Document>("Users", userSchema);
+export default model<IUser & Document>(CollectionNames.User, userSchema);

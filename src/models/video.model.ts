@@ -1,5 +1,7 @@
-import { Document, Schema, model, Types } from "mongoose";
+import { Document, Schema, model, Types, connection, mongo } from "mongoose";
 import { IVideo } from "../types/video.type.js";
+import { CollectionNames } from "../types/collection.types.js";
+import GridFsStorage from "multer-gridfs-storage";
 
 const VideoSchema: Schema = new Schema<IVideo>(
     {
@@ -21,8 +23,4 @@ const VideoSchema: Schema = new Schema<IVideo>(
     }
 );
 
-// const bucket = new mongo.GridFSBucket(connection.db, {
-//     bucketName: "uploads",
-// });
-
-export default model<IVideo & Document>("Videos", VideoSchema);
+export default model<IVideo & Document>(CollectionNames.Video, VideoSchema);
