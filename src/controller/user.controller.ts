@@ -137,7 +137,6 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
                     "Error in decrypting passwords"
                 );
             }
-            user.password = "Very secure!";
             if (result) {
                 const token = jwt.sign(
                     {
@@ -151,22 +150,28 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
                         expiresIn: config.jwt.JWT_EXPIRY_TIME,
                     }
                 );
-                // res.header("x-auth-token").status(200).send({ token });
+                user.password = "Very secure!";
+                res.header("x-auth-token").status(200).send({
+                    message: "User logged in",
+                    token: token,
+                    data: user,
+                });
                 // res.status(200).send({ token });
 
                 // setting the token in the header for next requests
                 Logging.event(`Token generated for user: ${user.name}`);
-                res.set("Authorization", `Bearer ${token}`)
-                    .status(200)
-                    .send({
-                        message: "User logged in",
-                        // token: token,
-                        data: user,
-                    })
-                    .cookie("token", token, {
-                        httpOnly: true,
-                        secure: true,
-                    });
+                // res.set("Authorization", `Bearer ${token}`)
+
+                // res.status(200)
+                // .send({
+                //     message: "User logged in",
+                //     token: token,
+                //     data: user,
+                // });
+                // .cookie("token", token, {
+                //     httpOnly: true,
+                //     secure: true,
+                // });
 
                 next();
             } else {
@@ -182,7 +187,7 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     // following 2 lines might be unreliable, but I am doint it in this way for now
     const { id } = req.params;
     const decodedUser = req.user;
-    const { modifiedData } = await req.body;
+    const modifiedData = req.body;
 
     !id && commonErrorActions.missingFields(res, "Pass user id to update");
 
@@ -191,7 +196,7 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
         await userCollection
-            .findByIdAndUpdate({ _id: id }, modifiedData, {
+            .findByIdAndUpdate(id, modifiedData, {
                 new: true,
                 upsert: true,
             })
@@ -202,7 +207,7 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
                         "User not found"
                     );
                 }
-                Logging.event(`User ${user.name} updated`);
+                Logging.event(`User "${user.name}" updated`);
                 res.status(200).send("User updated");
             })
             .catch((err) => {

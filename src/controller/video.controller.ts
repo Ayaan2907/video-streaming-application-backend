@@ -7,16 +7,11 @@ import mongoose from "mongoose";
 import { Role } from "../types/user.type.js";
 
 const uploadVideo = async (req: Request, res: Response, next: NextFunction) => {
-    const video: IVideo = req.body; // this is the video object currently treated as a text object
+    const video: IVideo = req.body;
     const { title, description } = video;
     const { _id, role } = req.user;
 
-    // const videoFile = req.file;
-    // const videoFilePath = videoFile.path;
-
-    // TODO: check missing fields later when actual video upload is implemented
-
-    role === Role.STUDENT &&
+    role === Role.STUDENT ??
         commonErrorActions.unauthorized(res, "Students can't upload video");
 
     try {
@@ -25,14 +20,11 @@ const uploadVideo = async (req: Request, res: Response, next: NextFunction) => {
             title,
             description,
             author: _id,
+            // videoUrl,
             comments: [],
             likes: 0,
             dislikes: 0,
-
-            // video: {
-            //     data: videoFilePath,
-            //     contentType: videoFile.mimetype,
-            // },
+            // thumbnail: req.file
         });
         await newVideo.save();
         res.status(201).json({
@@ -59,10 +51,6 @@ const getVideo = async (req: Request, res: Response, next: NextFunction) => {
             message: "Video found",
             data: video,
         });
-
-        // const videoFile = video.video.data;
-        // res.set("Content-Type", video.video.contentType);
-        // res.send(videoFile);
     } catch (error) {
         commonErrorActions.other(res, error, "Error in getting video");
     }

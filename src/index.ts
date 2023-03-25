@@ -11,9 +11,6 @@ import { IUser } from "./types/user.type.js";
 import { CollectionNames } from "./types/collection.types.js"
 
 
-import multer from "multer";
-import Grid from 'gridfs-stream';
-
 const router: Express = express();
 const allowedOrigins = ["*"];
 
@@ -25,10 +22,6 @@ const connectDatabase = () => {
             w: "majority",
         })
         .then(() => {
-            // init gfs
-            mongoose.Connection.once("open", () => {
-                Grid(mongoose.connection.db, mongo).collection(CollectionNames.Video);
-            });
             Logging.info("Connected to MongoDB");
             initServer(router);
         })

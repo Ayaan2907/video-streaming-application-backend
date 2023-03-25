@@ -6,12 +6,7 @@ export interface IVideo {
     title: string;
     description: string;
     author: Document;
-    video: {
-        data: Buffer;
-        contentType: string;
-        // TODO: jugad to store it in chunks
-    };
-
+    videoUrl: string;
     likes: number;
     dislikes: number;
     comments: IComment[] | Document[];

@@ -1,14 +1,18 @@
-import { Document, Schema, model, Types, connection, mongo } from "mongoose";
+import { Document, Schema, model, Types } from "mongoose";
 import { IVideo } from "../types/video.type.js";
 import { CollectionNames } from "../types/collection.types.js";
-import GridFsStorage from "multer-gridfs-storage";
+
+const AWS_S3_URL = "https://video-streaming-application.s3.amazonaws.com"; //sample
 
 const VideoSchema: Schema = new Schema<IVideo>(
     {
         title: { type: String, required: true },
         description: { type: String, required: true },
         author: { type: Types.ObjectId, ref: "Users" },
-        video: { data: Buffer, contentType: String }, // TODO: jugad to store it in chunks
+        videoUrl: {
+            type: String,
+            // required: true,
+        },
 
         // thumbnail: { data: Buffer, contentType: String },
         comments: [{ type: Types.ObjectId, ref: "Comments" }],
@@ -22,5 +26,19 @@ const VideoSchema: Schema = new Schema<IVideo>(
         toObject: { virtuals: true },
     }
 );
+
+// VideoSchema.set("toJSON", {
+//     virtuals: true,
+//     transform: function (doc, ret) {
+//         delete ret._id;
+//         delete ret.__v;
+//     },
+// });
+
+VideoSchema.pre("save", function (next) {
+    const videoObjectID = this._id;
+    this.videoUrl = ` ${AWS_S3_URL}/${videoObjectID}`;
+    next();
+});
 
 export default model<IVideo & Document>(CollectionNames.Video, VideoSchema);

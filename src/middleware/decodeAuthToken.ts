@@ -14,10 +14,10 @@ const decodeAuthToken = (req: Request, res: Response, next: NextFunction) => {
     }
     try {
         jwt.verify(token, config.jwt.JWT_SECRET, (err, decodedUser) => {
-            err ?? commonErrorActions.other(res, err);
-            Logging.event(`Token is valid for user: ${decodedUser as IUser}`);
+           if (err) return commonErrorActions.other(res, err);
+            Logging.info(`Token is valid for user: ${decodedUser as IUser}`);
             // res.status(200).send({
-            //     message: "Token is valid",
+            //     message: "Token is valid",  
             //     user: decodedUser as IUser,
             // });
 
