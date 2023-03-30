@@ -7,9 +7,14 @@ import authRouter from "./routes/user.routes.js";
 import videoRouter from "./routes/video.routes.js";
 import commentRouter from "./routes/comment.routes.js";
 import decodeAuthToken from "./middleware/decodeAuthToken.js";
-import { IUser } from "./types/user.type.js";
-import { CollectionNames } from "./types/collection.types.js"
+import aws from "aws-sdk";
 
+aws.config.update({
+    // setting my aws credentials
+    accessKeyId: config.aws.AWS_ACCESS_KEY_ID,
+    secretAccessKey: config.aws.AWS_SECRET_ACCESS_KEY,
+    region: config.aws.AWS_REGION,
+});
 
 const router: Express = express();
 const allowedOrigins = ["*"];

@@ -1,8 +1,8 @@
 import { Document, Schema, model, Types } from "mongoose";
 import { IVideo } from "../types/video.type.js";
 import { CollectionNames } from "../types/collection.types.js";
-
-const AWS_S3_URL = "https://video-streaming-application.s3.amazonaws.com"; //sample
+import config from "../config/config.js";
+// const AWS_S3_URL = "https://video-streaming-application.s3.amazonaws.com"; //sample
 
 const VideoSchema: Schema = new Schema<IVideo>(
     {
@@ -37,7 +37,7 @@ const VideoSchema: Schema = new Schema<IVideo>(
 
 VideoSchema.pre("save", function (next) {
     const videoObjectID = this._id;
-    this.videoUrl = ` ${AWS_S3_URL}/${videoObjectID}`;
+    this.videoUrl = `https://${config.aws.AWS_BUCKET_NAME}.s3.${config.aws.AWS_REGION}.amazonaws.com/${videoObjectID}`;
     next();
 });
 

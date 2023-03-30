@@ -5,11 +5,20 @@ import Logging from "../library/logging.js";
 import videoCollection from "../models/video.model.js";
 import mongoose from "mongoose";
 import { Role } from "../types/user.type.js";
+import config from "../config/config.js";
+import multer from "multer";
+import { awsFileUploader } from "./aws-s3.controller.js";
+
+//  it is storing the file in memory
+const multerUploader = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 524288000 },
+});
 
 const uploadVideo = async (req: Request, res: Response, next: NextFunction) => {
-    const video: IVideo = req.body;
-    const { title, description } = video;
+    const { title, description } = req.body;
     const { _id, role } = req.user;
+    const { file } = req;
 
     role === Role.STUDENT ??
         commonErrorActions.unauthorized(res, "Students can't upload video");
@@ -20,17 +29,27 @@ const uploadVideo = async (req: Request, res: Response, next: NextFunction) => {
             title,
             description,
             author: _id,
-            // videoUrl,
             comments: [],
             likes: 0,
             dislikes: 0,
             // thumbnail: req.file
         });
+        const fileUploadData = await awsFileUploader(
+            file,
+            newVideo._id.toString()
+        );
         await newVideo.save();
-        res.status(201).json({
-            message: "Video uploaded",
-            data: newVideo,
+        Logging.info(`Video ${newVideo._id} created`);
+        res.status(201).send({
+            message: "Video created",
+            data: {
+                title: newVideo.title,
+                description: newVideo.description,
+                author: newVideo.author,
+                videoUrl: fileUploadData.Location,
+            },
         });
+        next();
     } catch (error) {
         commonErrorActions.other(res, error, "Error in saving video");
     }
@@ -105,4 +124,4 @@ const deleteVideo = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export { getVideo, getAllVideos, uploadVideo, deleteVideo };
+export { getVideo, getAllVideos, uploadVideo, deleteVideo, multerUploader };
