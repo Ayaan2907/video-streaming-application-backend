@@ -35,10 +35,10 @@ const VideoSchema: Schema = new Schema<IVideo>(
 //     },
 // });
 
-VideoSchema.pre("save", function (next) {
-    const videoObjectID = this._id;
-    this.videoUrl = `https://${config.aws.AWS_BUCKET_NAME}.s3.${config.aws.AWS_REGION}.amazonaws.com/${videoObjectID}`;
-    next();
-});
+// VideoSchema.pre("save", function (next) {
+//     const videoObjectID = this._id;
+//     this.videoUrl = `https://${config.aws.AWS_BUCKET_NAME}.s3.${config.aws.AWS_REGION}.amazonaws.com/${videoObjectID}`;
+//     // next();
+// });
 
 export default model<IVideo & Document>(CollectionNames.Video, VideoSchema);

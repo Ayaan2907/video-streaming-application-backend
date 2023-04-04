@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 import { Role } from "../types/user.type.js";
 import config from "../config/config.js";
 import multer from "multer";
-import { awsFileUploader } from "./aws-s3.controller.js";
+import { awsFileUploader, deleteAFileFromS3 } from "./aws-s3.controller.js";
 
 //  it is storing the file in memory
 const multerUploader = multer({
@@ -20,6 +20,7 @@ const uploadVideo = async (req: Request, res: Response, next: NextFunction) => {
     const { _id, role } = req.user;
     const { file } = req;
 
+    console.log(file);
     role === Role.STUDENT ??
         commonErrorActions.unauthorized(res, "Students can't upload video");
 
@@ -28,16 +29,19 @@ const uploadVideo = async (req: Request, res: Response, next: NextFunction) => {
             _id: new mongoose.Types.ObjectId(),
             title,
             description,
+            videoUrl: file.Location,
             author: _id,
             comments: [],
             likes: 0,
             dislikes: 0,
             // thumbnail: req.file
         });
-        const fileUploadData = await awsFileUploader(
-            file,
-            newVideo._id.toString()
-        );
+
+        // const fileUploadData = await awsFileUploader(
+        //     file,
+        //     newVideo._id.toString()
+        // );
+        console.log("CHECK ")
         await newVideo.save();
         Logging.info(`Video ${newVideo._id} created`);
         res.status(201).send({
@@ -46,7 +50,7 @@ const uploadVideo = async (req: Request, res: Response, next: NextFunction) => {
                 title: newVideo.title,
                 description: newVideo.description,
                 author: newVideo.author,
-                videoUrl: fileUploadData.Location,
+                // videoUrl: fileUploadData.Location,
             },
         });
         next();
@@ -94,34 +98,39 @@ const getAllVideos = async (
     }
 };
 const deleteVideo = async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-    const { _id, role } = req.user;
+    // const { id } = req.params;
+    // const { _id, role } = req.user;
 
-    if (!id)
-        return commonErrorActions.missingFields(res, "Video id is missing");
+    // if (!id)
+    //     return commonErrorActions.missingFields(res, "Video id is missing");
 
-    try {
-        const video = await videoCollection.findById(id);
+    // try {
+    //     const video = await videoCollection.findById(id);
 
-        if (!video)
-            return commonErrorActions.emptyResponse(res, "Video not found");
+    //     if (!video)
+    //         return commonErrorActions.emptyResponse(res, "Video not found");
 
-        (video.author._id !== _id || role !== Role.ADMIN) &&
-            commonErrorActions.unauthorized(
-                res,
-                "Only admin, videos' author can delete video"
-            );
+    //     (video.author._id !== _id || role !== Role.ADMIN) ??
+    //         commonErrorActions.unauthorized(
+    //             res,
+    //             "Only admin, videos' author can delete video"
+    //         );
+    //     const deleteResp = await deleteAFileFromS3(video._id.toString());
+    //     Logging.info(`Video ${video._id} deleted from s3`);
 
-        videoCollection.deleteOne({ _id: id }, (err) => {
-            err ??
-                commonErrorActions.other(res, err, "Error in deleting video");
+    //     videoCollection.deleteOne({ _id: id }, (err) => {
+    //         err ??
+    //             commonErrorActions.other(res, err, "Error in deleting video");
 
-            Logging.info(`Video ${id} deleted`);
-            res.status(200).json({ message: "Video deleted successfully" });
-        });
-    } catch (error) {
-        commonErrorActions.other(res, error, "Error in deleting video");
-    }
+    //         Logging.info(`Video ${id} deleted`);
+    //         res.status(200).json({
+    //             message: "Video deleted successfully",
+    //             // data: { deleteResp },
+    //         });
+    //     });
+    // } catch (error) {
+    //     commonErrorActions.other(res, error, "Error in deleting video");
+    // }
 };
 
 export { getVideo, getAllVideos, uploadVideo, deleteVideo, multerUploader };

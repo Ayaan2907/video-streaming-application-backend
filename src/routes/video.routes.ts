@@ -13,7 +13,7 @@ import {
     multerUploader,
 } from "../controller/video.controller.js";
 import decodeAuthToken from "../middleware/decodeAuthToken.js";
-// import {awsFileUploader} from "../controller/aws-s3.controller.js";
+import {awsFileUploader} from "../controller/aws-s3.controller.js";
 const videoRoutes = express.Router();
 
 // Private routes
@@ -23,6 +23,7 @@ videoRoutes.post(
     "/upload-video",
     decodeAuthToken,
     multerUploader.single("video"),
+    awsFileUploader,
     uploadVideo
 );
 videoRoutes.delete("/video/:id", decodeAuthToken, deleteVideo);

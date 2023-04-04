@@ -3,7 +3,7 @@ import mongoose, { Connection, mongo } from "mongoose";
 import http from "http";
 import config from "./config/config.js";
 import Logging from "./library/logging.js";
-import authRouter from "./routes/user.routes.js";
+import authRouter from  "./routes/user.routes.js";
 import videoRouter from "./routes/video.routes.js";
 import commentRouter from "./routes/comment.routes.js";
 import decodeAuthToken from "./middleware/decodeAuthToken.js";
@@ -48,15 +48,13 @@ const initServer = (router: Express) => {
         Logging.event(`${req.method} [${req.originalUrl}] [${req.ip}]`);
         Logging.info(req.body);
 
-        res.header("Access-Control-Allow-Origin", allowedOrigins);
-        res.header(
-            "Access-Control-Allow-Methods",
-            "GET, POST, PUT, PATCH, DELETE"
-        );
-        res.header(
-            "Access-Control-Allow-Headers",
-            "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-        );
+        res.header({
+            "Access-Control-Allow-Origin": allowedOrigins,
+            "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE",
+            "Access-Control-Allow-Headers":
+                "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+            "Connection": "keep-alive",
+        });
         next();
     });
 
